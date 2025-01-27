@@ -215,5 +215,48 @@ def get_score(signature1, signature2, weights) -> float:
         score += abs(signature1[i] - signature2[i]) * weights[i]
     return score
 
+def lowest_score(signatures_dict, unknown_signature, weights):
+    """
+    signatures_dict - это словарь сопоставления сигнатур
+    unknown_signature - это сигнатура неизвестного текста.
+    weights - это список пяти весов.
+    Верни ключ, значение сигнатуры которого имеет наименьший балл с unknown_signature.
+
+    >>> d = {'Dan': [1,1,1,1,1], 'Leo': [3,3,3,3,3]}
+    >>> unknown = [1, 0.8, 0.9, 1.3, 1.4]
+    >>> weights = [11, 33, 50, 0.4, 4]
+    >>> lowest_score(d, unknown, weights)
+    'Dan'
+    """
+    lowest = None
+    for key in signatures_dict:
+        score = get_score(signatures_dict[key], unknown_signature, weights)
+        if lowest is None or score < lowest[1]:
+            lowest = (key, score)
+    return lowest[0]
+
+def process_data(mystery_filename, known_dir):
+    """
+    mystery_filename - это имя файла неизвестной книги, автора которой нужно определить.
+    known_dir - это имя каталога книг.
+    Верни имя сигнатуры, наиболее блзкое к сигнатуре текста mystery_filename.
+    """
+    signatures = get_all_signatures(known_dir)
+    with open(mystery_filename, 'r', encoding='utf-8') as f:
+        text = f.read()
+        unknown_signature = make_signature(text)
+    return lowest_score(signatures, unknown_signature, [11, 33, 50, 0.4, 4])
+
+def make_guess(known_dir):
+    """
+    Запроси у пользователя имя файла неизвестной книги.
+    Получи все сигнатуры книг в known_dir и выведи имя той из них,
+    которая имеет наименьший балл с именем файла пользователя.
+    """
+    filename = input('Enter the filename: ')
+    print(process_data(filename, known_dir))
+
 import doctest
 doctest.testmod()
+
+make_guess('ch7/known_authors')
